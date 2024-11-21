@@ -11,6 +11,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
+const async = require("async");
 
 const app = express();
 app.use(session({secret: "Salav2rk", saveUninitialized: true, resave: true}));
@@ -278,69 +279,58 @@ app.get("/eestifilm/tegelased", (req, res)=>{
 	//res.render("tegelased");
 });
 
+app.get("/eestifilm/lisaSeos", (req, res) => {
+    const filmQueries = [
+        function(callback) {
+            let sqlReq1 = "SELECT id, first_name, last_name, birth_date FROM person";
+            conn.execute(sqlReq1, (err, result) => {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return callback(null, result);
+                }
+            });
+        },
+        function(callback) {
+            let sqlReq2 = "SELECT id, title, production_year FROM movie";
+            conn.execute(sqlReq2, (err, result) => {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return callback(null, result);
+                }
+            });
+        },
+        function(callback) {
+            let sqlReq3 = "SELECT id, position_name FROM position"; // Corrected typo here
+            conn.execute(sqlReq3, (err, result) => {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return callback(null, result);
+                }
+            });
+        }
+    ];
 
-app.get("/addnews", (req, res)=>{
-  let notice = "";
-  let news_title = "";
-  let news_text = "";
-  let news_date = "";
-  let expiry_date = "";
-	res.render("addnews", {notice: notice, news_title: news_title, news_text: news_text, news_date: news_date, expiry_date: expiry_date});
+    async.parallel(filmQueries, (err, results) => {
+        if (err) {
+            console.error(err); // Log the error for debugging
+            return res.status(500).send("An error occurred while fetching data."); // Send error response
+        } else {
+            console.log(results);
+            res.render("addRelations", { 
+                personList: results[0], 
+                movieList: results[1], 
+                positionList: results[2] 
+            }); // Pass results to the template
+        }
+    });
 });
 
-app.get("/addnews", (req, res)=>{
-  let notice = "";
-  let news_title = "";
-  let news_text = "";
-  let news_date = "";
-  let expire_date = "";
-	res.render("addnews", {notice: notice, news_title: news_title, news_text: news_text, news_date: news_date, expire_date: expire_date});
-});
-
-app.get("/addnews", (req, res)=>{
-	let notice = "";
-	let news_title = "";
-	let news_text = "";
-	let news_date = "";
-	let expire_date = "";
-	  res.render("addnews", {notice: notice, news_title: news_title, news_text: news_text, news_date: news_date, expire_date: expire_date});
-  });
-  
-app.post("/addnews", (req, res)=>{
-	let notice = "";
-	let news_title = "";
-	let news_text = "";
-	let expire_date = "";
-	const user_id = 1;
-	if (!req.body.titleInput || !req.body.newsInput) {
-	  news_title = titleInput
-	  news_text = newsInput
-	  notice = "Palun täida kõik väljad.";
-	  res.render("addnews", {notice: notice, news_title: news_title, news_text: news_text, expire_date: expire_date, user_id: user_id});
-	}
-	else {
-	  let sqlreq = "INSERT INTO vp1_news (news_title, news_text, expire_date, user_id) VALUES(?,?,?,?)";
-	  if (!req.body.expireInput) {
-		const today = new Date();
-		let tenDaysFromNow = new Date(today);
-		tenDaysFromNow.setDate(today.getDate() + 10);
-		expire_date = tenDaysFromNow.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-	  }
-	  else {
-		expire_date = req.body.expireInput;
-	  }
-	  conn.query(sqlreq, [req.body.titleInput, req.body.newsInput, expire_date, user_id], (err, sqlres) => {
-		if (err) {
-		  console.log(expire_date)
-		  throw err
-		}
-		else {
-		  notice = "Uudis lisatud"
-		  res.render("addnews", {notice: notice, news_title: news_title, news_text: news_text, expire_date: expire_date});
-		}
-	  });
-	}
-  });
+// UUDISTE OSA ERALDI ROUTS FAILIGA
+const newsRouter = require("./routes/newsRoutes");
+app.use("/news", newsRouter);
 
 app.get("/photoupload", (req, res)=>{
 	res.render("photoupload");
