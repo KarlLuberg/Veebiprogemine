@@ -336,51 +336,13 @@ app.get("/photoupload", (req, res)=>{
 	res.render("photoupload");
 });
 
-app.post("/photoupload", upload.single("photoInput"), (req, res)=>{
-	console.log(req.body);
-	console.log(req.file);
-	//genereerime oma failinime
-	const filename = "vp_" + Date.now() + ".jpg";
-	//nimetame üleslaetud pildi ümber
-	fs.rename(req.file.path, req.file.destination + filename, (err)=>{
-		console.log(err);
-	});
-	//teeme 2 eri suurust
-	sharp(req.file.destination + filename).resize(800,600).jpeg({quality: 90}).toFile("./public/gallery/normal/" + filename);
-	res.render("photoupload");
-	sharp(req.file.destination + filename).resize(100,100).jpeg({quality: 90}).toFile("./public/gallery/thumb/" + filename);
-	//salvestame andmebaasi
-	let sqlReq = "INSERT INTO vp1_photos (file_name, orig_name, alt_text, privacy, user_id) VALUES(?,?,?,?,?)";
-	const userId = 1;
-	conn.query(sqlReq, [filename, req.file.originalname, req.body.altInput, req.body.privacyInput, userId], (err, result)=>{
-		if(err){
-			throw err;
-		}
-		else {
-			res.render("photoupload");
-		}
-	});
-	//res.render("photoupload");
-});
+//fotode Ã¼leslaadimise osa eraldi marsruutide failiga
+const photoupRouter = require("./routes/photouploadRoutes");
+app.use("/photoupload", photoupRouter);
 
-app.get("/gallery", (req, res)=>{
-	let sqlReq = "SELECT file_name, alt_text FROM vp1_photos WHERE privacy = ? AND deleted IS NULL ORDER BY id DESC";
-	const privacy = 3;
-	let photoList = [];
-	conn.query(sqlReq, [privacy], (err, result)=>{
-		if(err){
-			throw err;
-		}
-		else {
-			console.log(result);
-			for(let i = 0; i < result.length; i ++) {
-				photoList.push({href: "/gallery/thumb/" + result[i].file_name, alt: result[i].alt_text, fileName: result[i].file_name});
-			}
-			res.render("gallery", {listData: photoList});
-		}
-	});
-	//res.render("gallery");
-});
+//galerii osa eraldi marsruutide failiga
+const galleryRouter = require("./routes/galleryRoutes");
+app.use("/gallery", galleryRouter);
 
 
 app.listen(5121);

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <title>Kokkuvõte</title>
+</head>
+<body>
+  <h1>Kokkuvõtte leht</h1>
+  
+  <form method="GET" action="/summary_truck">
+    <label for="truck">Filtreeri autonumbri järgi:</label>
+    <input type="text" id="truck" name="truck" placeholder="Sisesta autonumber">
+    <button type="submit">Filtreeri</button>
+  </form>
+
+  <h2>Koormad:</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Auto number</th>
+        <th>Kaal sisenedes</th>
+        <th>Kaal peale väljumist</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (vehicles.length > 0) { %>
+        <% vehicles.forEach(vehicle => { %>
+          <tr>
+            <td><%= vehicle.truck %></td>
+            <td><%= vehicle.weight_in %></td>
+            <td><%= vehicle.weight_out %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="3">Andmeid ei leitud.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <title>Karl Luberg</title>
+</head>
+<body>
+  <img src="images/vp_banner_2024.png" alt="veebiprogrammeerimise 2024 banner">
+  <h1>Karl Luberg</h1>
+  <p>See leht on loodud õppetöö raames <a href="https://www.tlu.ee" target="_blank">Tallinna ülikoolis</a> ja ei sisalda tõsiseltvõetavat sisu </p>
+  <hr>
+
+  <h2>Auto andmete sisestamine</h2>
+  <form method="POST">
+    <div>
+      <label for="truck">Auto number:</label>
+      <input type="text" id="truck" name="truck" required>
+    </div>
+    <div>
+      <label for="weight_in">Auto kaal sisenemisel:</label>
+      <input type="number" id="weight_in" name="weight_in" required>
+    </div>
+    <div>
+      <label for="weight_out">Auto kaal väljumisel:</label>
+      <input type="number" id="weight_out" name="weight_out" required>
+    </div>
+    <button type="submit">Sisesta andmed</button>
+  </form>
+
+  <hr>
+  <ul>
+    <li><a href="/insert_truck_data">Andmete sisestamine</a></li>
+    <li><a href="/summary_truck">Andmete vaatamine</a></li>
+  </ul>
+
+</body>
+</html>
